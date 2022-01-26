@@ -15,6 +15,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   shared_preferences:
   auto_size_text: ^3.0.0
+  firebase_core: ^1.10.0
+  firebase_messaging: ^11.2.4
+  cloud_firestore: ^2.2.0
+  firebase_storage: ^8.1.0
   # GET
   get: ^4.3.8
   get_storage: ^2.0.3
@@ -22,7 +26,27 @@ dependencies:
   webview_flutter: ^2.3.1
   url_launcher: ^6.0.13
   flutter_html: ^2.1.5
+  get_it: ^7.2.0
   snapping_sheet: ^3.1.0
+  google_fonts: ^2.1.0
+  modal_progress_hud: ^0.1.3
+  mobx: ^2.0.5
+  dio: ^4.0.4
+  http: any
+  async_loader: ^0.1.1
+  sweetalert:
+  scoped_model: ^2.0.0-nullsafety.0
+  localstorage: ^4.0.0+1
+
+
+  intl:
+  html: ^0.15.0
+
+
+
+
+
+
 
 
 dev_dependencies:

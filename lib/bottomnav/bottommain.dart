@@ -1,11 +1,19 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:profilebab/model/ChatMessage.dart';
 import 'package:profilebab/widget/ChatBubble.dart';
 import 'package:profilebab/widget/DefaultGrabbing.dart';
+import 'package:profilebab/widget/ProgressHUD.dart';
 import 'package:profilebab/widget/drawer_link_widget.dart';
+import 'package:profilebab/widget/notification.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:http/http.dart' as http;
 
 class BottomDas extends StatefulWidget {
   @override
@@ -26,6 +34,13 @@ class BottomDasState extends State<BottomDas> {
   double _height;
   double _width;
   bool isExpanded = false;
+  List data;
+  bool isApiCallProcess = false;
+  final db = FirebaseFirestore.instance;
+  DocumentReference _documentReference;
+  String notificationTitle = 'No Title';
+  String notificationBody = 'No Body';
+  String notificationData = 'No Data';
 
   List<ChatMessage> chatMessage = [
     ChatMessage(message: "Hi John", type: MessageType.Receiver),
@@ -37,6 +52,26 @@ class BottomDasState extends State<BottomDas> {
         message: "I'm fine, Working from home", type: MessageType.Receiver),
     ChatMessage(message: "Oh! Nice. Same here man", type: MessageType.Sender),
   ];
+
+  Future<String> GetJsondata() async {
+    isApiCallProcess = true;
+    var Response = await http.get(
+        Uri.parse('https://profilebaba.com/api/category-list'),
+        headers: {"Accept": "application/json"});
+
+    setState(() {
+      // res=json.decode(Response.body.toString());
+      //res=res.replaceAll("[", "").replaceAll("]", "");
+      //  res = Response.body.toString();
+      if (jsonDecode(Response.body)['success'].toString().contains("true")) {
+        data = jsonDecode(Response.body)['data'];
+        print(data);
+        isApiCallProcess = false;
+      } else {
+        isApiCallProcess = false;
+      }
+    });
+  }
 
   // List<SendMenuItems> menuItems = [
   //   SendMenuItems(
@@ -51,9 +86,20 @@ class BottomDasState extends State<BottomDas> {
 
   @override
   void initState() {
+    final firebaseMessaging = FCM();
+    firebaseMessaging.getToken();
+
     super.initState();
     _scrollController = ScrollController();
     snappingSheetController = SnappingSheetController();
+    GetJsondata();
+    print("alll");
+    print(db
+        .collection("Adminchat")
+        .doc("9899740760-admin")
+        .collection("ChatHistory")
+        .snapshots()
+        .length);
   }
 
   void _expand() {
@@ -378,411 +424,68 @@ class BottomDasState extends State<BottomDas> {
           ],
           child: Column(
             children: [
-              Container(
-                margin: EdgeInsets.only(left: 10, right: 10),
-                child: GridView.count(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  crossAxisCount: 4,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {
-                            // snappingSheetController
-                            //     .setSnappingSheetPosition(100);
-                            snappingSheetController.snapToPosition(
-                              SnappingPosition.factor(positionFactor: 0.90),
+              data != null
+                  ? Container(
+                      margin: EdgeInsets.only(left: 10, right: 10),
+                      child: GridView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                          ),
+                          itemCount: data.length == null ? 0 : data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              children: <Widget>[
+                                GestureDetector(
+                                  onTap: () {
+                                    // snappingSheetController
+                                    //     .setSnappingSheetPosition(100);
+                                    snappingSheetController.snapToPosition(
+                                      SnappingPosition.factor(
+                                          positionFactor: 0.90),
+                                    );
+                                  },
+                                  child: Card(
+                                    elevation: 8,
+                                    shape: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                            color: Colors.blueAccent,
+                                            width: 1)),
+                                    child: Container(
+                                      height: 60,
+                                      width: 60,
+                                      child: Image.network(
+                                        'https://profilebaba.com/uploads/category/' +
+                                            data[index]["icon"],
+                                        height: _height / 10,
+                                        width: _width / 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    data[index]["title"],
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ],
                             );
-                          },
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/plumber.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Plumber",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
+                          }),
+                    )
+                  : Center(
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {
-                            _scrollController.position.maxScrollExtent;
-                            // _scrollController.snapToPosition(
-                            //   SnappingPosition.factor(positionFactor: 0.75),
-                            // );
-                          },
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/doctor.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Doctor",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/teacher.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Teacher",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/maid.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Maid",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/realestate.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Real State",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/carpenter.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Carpenter",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/whitewash.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "White Wash",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/packermover.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Packer & mover",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/beauty.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Beautication",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/electrician.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Electrician",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/internet.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Internet Provider",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {},
-                          child: Card(
-                            elevation: 8,
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.blueAccent, width: 1)),
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              child: Image.asset(
-                                'assets/images/other.png',
-                                height: _height / 10,
-                                width: _width / 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            "Other",
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
               Padding(
                 padding: EdgeInsets.all(20),
                 child: Container(
@@ -928,7 +631,9 @@ class BottomDasState extends State<BottomDas> {
                         height: 60,
                         width: 60,
                         child: FloatingActionButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            chatwithadmin();
+                          },
                           child: Icon(
                             Icons.call,
                             color: Colors.white,
@@ -948,4 +653,28 @@ class BottomDasState extends State<BottomDas> {
 
   @override
   bool get wantKeepAlive => true;
+
+  void chatwithadmin() {
+    Map<String, dynamic> chatMessageMap = {
+      "sendBy": "9899740760",
+      "message": "sfhsf",
+      'time': DateTime.now().millisecondsSinceEpoch,
+    };
+    db
+        .collection("Adminchat")
+        .doc("9899740760-admin")
+        .collection("ChatHistory")
+        .add(chatMessageMap)
+        .catchError((e) {
+      print(e.toString());
+    });
+  }
+
+  getchats() {
+    QuerySnapshot snap = await db.collection('collection').getDocuments();
+
+    snap.documents.forEach((document) {
+      print(document.documentID);
+    });
+  }
 }
