@@ -9,6 +9,7 @@ import 'package:profilebab/widget/ProgressHUD.dart';
 import 'package:profilebab/widget/mycolor.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -19,12 +20,20 @@ class _SignupPageState extends State<SignupPage> {
   bool isApiCallProcess = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  SharedPreferences preferences;
+  var user_id;
   final db = FirebaseFirestore.instance;
   DocumentReference _documentReference;
   var _controllername = new TextEditingController();
   var _controlleremail = new TextEditingController();
   var _controllernumber = new TextEditingController();
   var _controllerpassword = new TextEditingController();
+
+  Future<void> user_idsave(int id, bool login_status) async {
+    preferences = await SharedPreferences.getInstance();
+    preferences.setInt("user_id", id);
+    preferences.setBool("is_login", login_status);
+  }
 
   @override
   void initState() {
@@ -53,11 +62,10 @@ class _SignupPageState extends State<SignupPage> {
     });
   }
 
-  void _upload() async {
-    // if (file != null) {
-    setState(() {
-      isApiCallProcess = true;
-    });
+  Future _upload() async {
+    // setState(() {
+    //   isApiCallProcess = true;
+    // });
     final data = {
       'name': _controllername.text,
       'email': _controlleremail.text,
@@ -69,13 +77,15 @@ class _SignupPageState extends State<SignupPage> {
         .post('https://profilebaba.com/api/register', data: data)
         .then((response) async {
       dynamic jsonResponse = jsonDecode(response.toString())['message'];
-      print(jsonResponse);
+      dynamic id = jsonDecode(response.toString())['data'];
       if (jsonResponse.toString().contains('User created successfully.')) {
         isApiCallProcess = false;
-        addDataToDb(jsonResponse);
-        // Navigator.push(
-
-        //     context, MaterialPageRoute(builder: (ctx) => Loginscreen()));
+        user_id = id["user_id"];
+        print(data.toString());
+        print(user_id);
+        print("registerid");
+        user_idsave(user_id, true);
+        // addDataToDb(jsonResponse);
       } else {
         showMessage("Something Went Wrong", isApiCallProcess);
         isApiCallProcess = false;

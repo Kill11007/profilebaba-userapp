@@ -26,6 +26,14 @@ class _LoginPageState extends State<LoginPage> {
 
   var _controllerpassword = new TextEditingController();
   var _controllernumber = new TextEditingController();
+  SharedPreferences preferences;
+  var user_id;
+
+  Future<void> user_idsave(int id, bool login_status) async {
+    preferences = await SharedPreferences.getInstance();
+    preferences.setInt("user_id", id);
+    preferences.setBool("is_login", login_status);
+  }
 
   @override
   void initState() {
@@ -34,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _upload() async {
-    // if (file != null) {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       isApiCallProcess = true;
     });
@@ -45,15 +53,16 @@ class _LoginPageState extends State<LoginPage> {
     Dio dio = new Dio();
     dio.post('https://profilebaba.com/api/login', data: data).then((response) {
       dynamic jsonResponse = jsonDecode(response.toString())['message'];
-
+      dynamic id = jsonDecode(response.toString())['data'];
       if (jsonResponse.toString().contains('User login successfull')) {
         showMessage(jsonResponse.toString(), isApiCallProcess);
         isApiCallProcess = false;
         _controllernumber.clear();
         _controllerpassword.clear();
-
-        // Navigator.push(
-        //     context, MaterialPageRoute(builder: (ctx) => Loginscreen()));
+        user_id = id["user_id"];
+        print(user_id);
+        print("bbamitji");
+        user_idsave(user_id, true);
       } else {
         showMessage("Something Went Wrong", isApiCallProcess);
         isApiCallProcess = false;

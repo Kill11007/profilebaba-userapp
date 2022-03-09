@@ -19,6 +19,10 @@ class _ResetpasswordState extends State<Resetpassword> {
   bool isApiCallProcess = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   var _controllernumber = new TextEditingController();
+  final double _initFabHeight = 120.0;
+  double _fabHeight = 0;
+  double _panelHeightOpen = 0;
+  double _panelHeightClosed = 95.0;
 
   @override
   void initState() {

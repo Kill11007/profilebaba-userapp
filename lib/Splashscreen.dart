@@ -29,27 +29,17 @@ class SplashScreenState extends State<MyHomePage> {
 
   Future checkFirstSeen() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool _seen = (prefs.getBool('seen') ?? false);
-    SharedPreferences prefsr = await SharedPreferences.getInstance();
-    String bb;
 
-    setState(() {
-      bb = prefsr.getString('login');
-      print(bb);
-    });
+    print(prefs.getBool("is_login"));
+    print("valur");
+    setState(() {});
 
-    if (_seen) {
-      // if (bb == "true") {
+    if (prefs.getBool("is_login") == true) {
+      Navigator.of(context).pushReplacement(
+          new MaterialPageRoute(builder: (context) => new BottomDas()));
+    } else {
       Navigator.of(context).pushReplacement(
           new MaterialPageRoute(builder: (context) => new LoginPage()));
-      // } else {
-      //   Navigator.of(context).pushReplacement(
-      //       new MaterialPageRoute(builder: (context) => new IntroPage()));
-      // }
-    } else {
-      await prefs.setBool('seen', true);
-      Navigator.of(context).pushReplacement(
-          new MaterialPageRoute(builder: (context) => new IntroPage()));
     }
   }
 }
