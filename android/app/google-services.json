@@ -1,41 +1,71 @@
 {
   "project_info": {
-    "project_number": "656687827532",
-    "project_id": "profilebabavendor-e83a4",
-    "storage_bucket": "profilebabavendor-e83a4.appspot.com"
+    "project_number": "351471668393",
+    "firebase_url": "https://profilebaba-7e028-default-rtdb.firebaseio.com",
+    "project_id": "profilebaba-7e028",
+    "storage_bucket": "profilebaba-7e028.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:656687827532:android:883a37f920e8557b9302e9",
+        "mobilesdk_app_id": "1:351471668393:android:a3cee3e308476285eaedb8",
         "android_client_info": {
-          "package_name": "com.profilebaba.profilebabavendor"
+          "package_name": "com.example.profilebab"
         }
       },
       "oauth_client": [
         {
-          "client_id": "656687827532-s3392lbg34b3p14et348i3d1d4ii6gor.apps.googleusercontent.com",
+          "client_id": "351471668393-r1gqfgcbap0lvgcfpod6pngngko68bjm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.profilebaba.profilebabavendor",
+            "package_name": "com.example.profilebab",
             "certificate_hash": "8ce327720e6cfc9eeff6d10e9e9e720f57aa54d0"
           }
         },
         {
-          "client_id": "656687827532-p6qmt79evo72sk478fmcpc4d2ts10u4n.apps.googleusercontent.com",
+          "client_id": "351471668393-p5l9ifgie4334esu41rhhuvm94m6s3dh.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBKAGvnxnSubjdOfTYtGHiitF0lQtk_gd0"
+          "current_key": "AIzaSyBBtOwWOGvKUz8Grd_pQLNaIWh95HkbQFQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "656687827532-p6qmt79evo72sk478fmcpc4d2ts10u4n.apps.googleusercontent.com",
+              "client_id": "351471668393-p5l9ifgie4334esu41rhhuvm94m6s3dh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:351471668393:android:a82c154907167849eaedb8",
+        "android_client_info": {
+          "package_name": "com.profilebaba.profilebabavendor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "351471668393-p5l9ifgie4334esu41rhhuvm94m6s3dh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBtOwWOGvKUz8Grd_pQLNaIWh95HkbQFQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "351471668393-p5l9ifgie4334esu41rhhuvm94m6s3dh.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
